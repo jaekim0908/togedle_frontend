@@ -1,0 +1,9 @@
+<div class="container">
+    <h1>Project {{ project.name }} </h1>
+    <img width="400px" src="{{ project.originalUrl }}"><img>
+    
+    <h3>Total tiles : {{ project.height * project.width }}</h3>
+    <h3>Tiles done : {{ projects.done.length ? projects.done.length : 0}}</h3>
+    
+    <div class="btn btn-default btn-lg" ng-click="paintTile()">Paint a tile</div>
+</div>

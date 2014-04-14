@@ -58,6 +58,7 @@ app.controller('ProjectController', ['$scope', '$rootScope', '$routeParams', '$h
 }]);
 
 app.controller('TileController', ['$scope', '$rootScope', '$routeParams', '$http', function ($scope, $rootScope, $routeParams, $http) {
+    prepareCanvas();
     $scope.pad = function(num, size) {
         var s = num+"";
         while (s.length < size) s = "0" + s;

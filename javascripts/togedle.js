@@ -14,6 +14,10 @@ app.config(['$routeProvider', function($routeProvider) {
         templateUrl: 'templates/tile.html',
         controller: 'TileController'
     })
+    .when('/create', {
+        templateUrl: 'templates/create.html',
+        controller: 'CreateController'
+    })
     .otherwise({
         redirectTo: '/'
     });
@@ -37,6 +41,10 @@ app.controller('ProjectsController', ['$scope', '$rootScope', '$http', function 
     });
 }]);
 
+app.controller('CreateController', ['$scope', '$http', function ($scope, $http) {
+    $scope.projectInfo = {};
+}]);
+
 app.controller('ProjectController', ['$scope', '$rootScope', '$routeParams', '$http', '$location', function ($scope, $rootScope, $routeParams, $http, $location) {
     $http({method: 'GET', url: 'http://localhost:3000/project/' + $routeParams.id})
     .success(function(data, status, headers, config) {
@@ -56,9 +64,29 @@ app.controller('ProjectController', ['$scope', '$rootScope', '$routeParams', '$h
         });
     }
 }]);
-
 app.controller('TileController', ['$scope', '$rootScope', '$routeParams', '$http', function ($scope, $rootScope, $routeParams, $http) {
-    prepareCanvas();
+    $scope.tools = {};
+    $scope.$watch('tools', function(newValue, oldValue) {
+        $scope.drawingpad.set("size", $scope.tools.size);
+    });
+    $scope.drawingpad = $('#colors_sketch').sketch().data('sketch');
+    
+    $scope.clickColor = function(color){
+        $scope.drawingpad.set("color", color);
+    };
+    
+    $scope.mouseOverColor = function(color){
+        $scope.tools.color = color;
+    };
+    
+    $scope.clear = function() {
+        console.log("clear");
+    };
+    
+    $scope.submit = function() {
+        console.log("submit");
+    };
+    
     $scope.pad = function(num, size) {
         var s = num+"";
         while (s.length < size) s = "0" + s;
@@ -68,3 +96,14 @@ app.controller('TileController', ['$scope', '$rootScope', '$routeParams', '$http
     $scope.tileNum = $routeParams.id;
     
 }]);
+
+app.directive("ngRangeSelect", function () {
+    return {
+        link: function ($scope, el) {
+            el.bind("change", function (e) {
+                console.log(e);
+            })
+        }
+    }
+
+});

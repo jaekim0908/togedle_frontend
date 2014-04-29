@@ -1,5 +1,10 @@
-<div class="container-fluid">
-    <div ng-repeat="project in projects">
-        <a href="#/project/{{ accessors.getId(project) }}"><img src="{{ project.originalUrl }}"><img></a>
+<div ng-show="sessionUser == null">
+    <div ng-include src="'templates/loggedout.html'"></div>
+</div>
+{{messages}}
+<div ng-show="sessionUser != null">
+    <div class="jumbotron">
+        <h1>Welcome to Togedle, {{ sessionUser.get('firstName') }}</h1>
     </div>
 </div>
+

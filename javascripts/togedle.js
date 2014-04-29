@@ -2,9 +2,17 @@ var app = angular.module("togedle", ['ngRoute']);
 
 app.config(['$routeProvider', function($routeProvider) {
     $routeProvider
-    .when('/', {
+    .when('/projects', {
         templateUrl: 'templates/home.html',
         controller: 'ProjectsController'
+    })
+    .when('/', {
+        templateUrl: 'templates/home.html',
+        controller: 'HomeController'
+    })
+    .when('/register', {
+        templateUrl: 'templates/register.html',
+        controller: 'RegisterController'
     })
     .when('/project/:id', {
         templateUrl: 'templates/project.html',
@@ -23,6 +31,13 @@ app.config(['$routeProvider', function($routeProvider) {
     });
 }]);
 
+app.run(function ($rootScope) {
+    Parse.initialize("pFC25pM9GzkLNZxSbPKHyQIINxaoNrI1xwJMFrzA",
+                       "4FdWCJ4mm9PxhKUcA78xivjRCjoWf6G8PB30wBIs");
+   
+});
+
+
 app.run(function($rootScope) {
     $rootScope.accessors = {
       getId: function(row) {
@@ -30,6 +45,43 @@ app.run(function($rootScope) {
       }
     }
   });
+
+app.controller('HomeController', ['$scope', '$rootScope', 'ParseService', '$location', function ($scope, $rootScope, ParseService, $location) {
+    $scope.credential = {};
+    $scope.messages = [];
+    
+    $scope.login = function(){
+        ParseService.login($scope.credential.email, $scope.credential.password)
+        .then(function (result) {
+            $rootScope.sessionUser = result;
+            $location.path("/");
+        }, function (error) {
+            $scope.messages.push(error);
+        });
+    }
+}]);
+
+app.controller('RegisterController', ['$scope', '$rootScope', 'ParseService', '$location', function ($scope, $rootScope, ParseService, $location) {
+
+    $scope.messages = [];
+    $scope.submit = function(){
+        $scope.messages = [];
+        if ($scope.credential.password != $scope.credential.passwordRepeat) {
+            $scope.messages.push("password and repeated password don't match");
+            return;
+        }
+        ParseService.register($scope.credential)
+        .then(function (result) {
+            $rootScope.sessionUser = result;
+            $location.path("/");
+            
+        }, function (error) {
+            $scope.messages.push(error);
+        });
+        
+    }
+    
+}]);
 
 app.controller('ProjectsController', ['$scope', '$rootScope', '$http', function ($scope, $rootScope, $http) {
     $http({method: 'GET', url: 'http://localhost:3000/projects'})

@@ -2,13 +2,13 @@ var app = angular.module("togedle", ['ngRoute']);
 
 app.config(['$routeProvider', function($routeProvider) {
     $routeProvider
-    .when('/projects', {
-        templateUrl: 'templates/home.html',
-        controller: 'ProjectsController'
-    })
     .when('/', {
         templateUrl: 'templates/home.html',
         controller: 'HomeController'
+    })
+    .when('/login', {
+        templateUrl: 'templates/login.html',
+        controller: 'LoginController'
     })
     .when('/register', {
         templateUrl: 'templates/register.html',
@@ -26,6 +26,10 @@ app.config(['$routeProvider', function($routeProvider) {
         templateUrl: 'templates/create.html',
         controller: 'CreateController'
     })
+    .when('/createProject', {
+        templateUrl: 'templates/createProject.html',
+        controller: 'CreateProjectController'
+    })
     .otherwise({
         redirectTo: '/'
     });
@@ -34,6 +38,16 @@ app.config(['$routeProvider', function($routeProvider) {
 app.run(function ($rootScope) {
     Parse.initialize("pFC25pM9GzkLNZxSbPKHyQIINxaoNrI1xwJMFrzA",
                        "4FdWCJ4mm9PxhKUcA78xivjRCjoWf6G8PB30wBIs");
+    
+    // returns current loggedin user
+    if (Parse.User.current() != null) {
+        Parse.User.current().fetch().then(function (user) {
+            $rootScope.sessionUser = user;
+            $rootScope.sessionUserForm = user.toJSON();
+            if ($rootScope.sessionUser != null) {
+            }
+        });
+    }
    
 });
 
@@ -50,6 +64,22 @@ app.controller('HomeController', ['$scope', '$rootScope', 'ParseService', '$loca
     $scope.credential = {};
     $scope.messages = [];
     
+    if($rootScope.sessionUser == null) {
+        $location.path("/login");
+    }
+    
+    
+    if($rootScope.sessionUser != null){
+        ParseService.getProjects($rootScope.sessionUser)
+        .then(function (result) {
+            $scope.projects = result;
+            console.log($rootScope.sessionUser);
+            console.log($scope.projects);
+        }, function (error) {
+            $scope.messages.push(error);
+        });
+    }
+    
     $scope.login = function(){
         ParseService.login($scope.credential.email, $scope.credential.password)
         .then(function (result) {
@@ -60,6 +90,27 @@ app.controller('HomeController', ['$scope', '$rootScope', 'ParseService', '$loca
         });
     }
 }]);
+
+app.controller('LoginController', ['$scope', '$rootScope', 'ParseService', '$location', function ($scope, $rootScope, ParseService, $location) {
+    $scope.credential = {};
+    $scope.messages = [];
+    
+    if($rootScope.sessionUser != null) {
+        $location.path("/");
+    }
+    
+    $scope.login = function(){
+        ParseService.login($scope.credential.email, $scope.credential.password)
+        .then(function (result) {
+            $rootScope.sessionUser = result;
+            $location.path("/");
+        }, function (error) {
+            $scope.messages.push(error);
+        });
+    }
+}]);
+
+
 
 app.controller('RegisterController', ['$scope', '$rootScope', 'ParseService', '$location', function ($scope, $rootScope, ParseService, $location) {
 
@@ -83,14 +134,20 @@ app.controller('RegisterController', ['$scope', '$rootScope', 'ParseService', '$
     
 }]);
 
-app.controller('ProjectsController', ['$scope', '$rootScope', '$http', function ($scope, $rootScope, $http) {
-    $http({method: 'GET', url: 'http://localhost:3000/projects'})
-    .success(function(data, status, headers, config) {
-        $scope.projects = data;
-    })
-    .error(function(data, status, headers, config) {
-        console.log(data);
-    });
+app.controller('CreateProjectController', ['$scope', '$rootScope', 'ParseService', '$location', function ($scope, $rootScope, ParseService, $location) {
+
+    $scope.messages = [];
+    $scope.submit = function(){
+        $scope.messages = [];
+        $scope.project.user = $rootScope.sessionUser;
+        ParseService.createProject($scope.project)
+        .then(function (result) {
+            $location.path("/");
+        }, function (error) {
+            $scope.messages.push(error);
+        });
+    }
+    
 }]);
 
 app.controller('CreateController', ['$scope', '$http', function ($scope, $http) {

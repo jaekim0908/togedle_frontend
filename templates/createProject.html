@@ -13,6 +13,11 @@
         <label for="LastName">Description</label>
         <textarea type="text" class="form-control" ng-model="project.description" placeholder="Project Description"></textarea>
       </div>
+      <div class="form-group">
+        <label for="picture">Picture</label>
+        <input type="file" ng-file-select="onFileSelect($files)">
+      </div>
+      
       <a type="submit" class="btn btn-default" ng-click="submit()">Submit</a>
     </form>
 </div>

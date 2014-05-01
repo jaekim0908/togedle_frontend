@@ -1,4 +1,4 @@
-var app = angular.module("togedle", ['ngRoute']);
+var app = angular.module("togedle", ['ngRoute','angularFileUpload']);
 
 app.config(['$routeProvider', function($routeProvider) {
     $routeProvider
@@ -35,6 +35,7 @@ app.config(['$routeProvider', function($routeProvider) {
     });
 }]);
 
+
 app.run(function ($rootScope) {
     Parse.initialize("pFC25pM9GzkLNZxSbPKHyQIINxaoNrI1xwJMFrzA",
                        "4FdWCJ4mm9PxhKUcA78xivjRCjoWf6G8PB30wBIs");
@@ -59,6 +60,10 @@ app.run(function($rootScope) {
       }
     }
   });
+
+app.config(function($httpProvider){
+    delete $httpProvider.defaults.headers.common['X-Requested-With'];
+});
 
 app.controller('HomeController', ['$scope', '$rootScope', 'ParseService', '$location', function ($scope, $rootScope, ParseService, $location) {
     $scope.credential = {};
@@ -134,20 +139,36 @@ app.controller('RegisterController', ['$scope', '$rootScope', 'ParseService', '$
     
 }]);
 
-app.controller('CreateProjectController', ['$scope', '$rootScope', 'ParseService', '$location', function ($scope, $rootScope, ParseService, $location) {
+app.controller('CreateProjectController', ['$scope', '$rootScope', 'ParseService', '$location', '$http', '$upload', function ($scope, $rootScope, ParseService, $location, $http, $upload) {
 
     $scope.messages = [];
+    
+    $scope.onFileSelect = function($files) {
+        $scope.file = $files;
+        console.log("file : " + $scope.file);
+    }
+    
     $scope.submit = function(){
         $scope.messages = [];
         $scope.project.user = $rootScope.sessionUser;
-        ParseService.createProject($scope.project)
-        .then(function (result) {
-            $location.path("/");
-        }, function (error) {
-            $scope.messages.push(error);
+        
+        $upload.upload({
+            url: 'http://localhost:3000/projects/addProject',
+            headers: {
+                'Access-Control-Request-Origin': 'http://localhost:8888/',
+                'Access-Control-Allow-Headers': 'Content-Type, X-Requested-With',
+                'Content-Type': undefined,
+                'enctype': "multipart/form-data"
+            },
+            data: { project: $scope.project},
+            file: $scope.file
+        }).progress(function(evt) {
+            console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
+        }).success(function(data, status, headers, config) {
+          // file is uploaded successfully
+          console.log(data);
         });
     }
-    
 }]);
 
 app.controller('CreateController', ['$scope', '$http', function ($scope, $http) {
@@ -214,5 +235,4 @@ app.directive("ngRangeSelect", function () {
             })
         }
     }
-
 });

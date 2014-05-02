@@ -49,7 +49,6 @@ app.run(function ($rootScope) {
             }
         });
     }
-   
 });
 
 
@@ -142,13 +141,27 @@ app.controller('RegisterController', ['$scope', '$rootScope', 'ParseService', '$
 app.controller('CreateProjectController', ['$scope', '$rootScope', 'ParseService', '$location', '$http', '$upload', function ($scope, $rootScope, ParseService, $location, $http, $upload) {
 
     $scope.messages = [];
+    $scope.part1Done = false;
+    $scope.newProject;
     
     $scope.onFileSelect = function($files) {
         $scope.file = $files;
         console.log("file : " + $scope.file);
-    }
+    };
     
-    $scope.submit = function(){
+    $scope.createProject = function() {
+        $scope.project.user = $rootScope.sessionUser;
+        ParseService.createProject($scope.project)
+        .then(function (result) {
+            $scope.part1Done = true;
+            $scope.newProject = result;
+            console.log(result);
+        }, function (error) {
+            $scope.messages.push(error);
+        });
+    };
+    
+    $scope.updatePicture = function(){
         $scope.messages = [];
         $scope.project.user = $rootScope.sessionUser;
         
@@ -160,7 +173,7 @@ app.controller('CreateProjectController', ['$scope', '$rootScope', 'ParseService
                 'Content-Type': undefined,
                 'enctype': "multipart/form-data"
             },
-            data: { project: $scope.project},
+            data: { project: $scope.newProject.toJSON() },
             file: $scope.file
         }).progress(function(evt) {
             console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));

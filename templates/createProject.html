@@ -4,21 +4,33 @@
 
 {{ messages }}
 <div class="container">
-    <form role="form">
-      <div class="form-group">
-        <label for="name">Project name</label>
-        <input type="text" class="form-control" ng-model="project.name" placeholder="Project Name">
-      </div>
-      <div class="form-group">
-        <label for="LastName">Description</label>
-        <textarea type="text" class="form-control" ng-model="project.description" placeholder="Project Description"></textarea>
-      </div>
-      <div class="form-group">
-        <label for="picture">Picture</label>
-        <input type="file" ng-file-select="onFileSelect($files)">
-      </div>
+    <h1>Part 1 : Give a name</h1>
+    <div id="part1" ng-show="!part1Done">
+        <form role="form">
+            <div class="form-group">
+                <label for="name">Project name</label>
+                <input type="text" class="form-control" ng-model="project.name" placeholder="Project Name">
+            </div>
+            <div class="form-group">
+                <label for="LastName">Description</label>
+                <textarea class="form-control" ng-model="project.description" placeholder="Project Description"></textarea>
+            </div>
+            <a type="submit" class="btn btn-default" ng-click="createProject()">Create Project</a>
+        </form>
+    </div>
+    <h1>Part 2 : Choose the picture to doodle together</h1>
+    <div id="part2" ng-show="part1Done">
+        <form role="form">
+            <div class="form-group">
+              <label for="picture">Picture</label>
+              <input type="file" ng-file-select="onFileSelect($files)">
+            </div>
+            <a type="submit" class="btn btn-default" ng-click="updatePicture()">UpdatePicture</a>
+        </form>
+    </div>
+        
+          
       
-      <a type="submit" class="btn btn-default" ng-click="submit()">Submit</a>
-    </form>
+      
 </div>
 
